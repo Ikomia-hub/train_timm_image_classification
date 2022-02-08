@@ -181,15 +181,8 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         dataprocess.CTaskFactory.__init__(self)
         # Set process information as string here
         self.info.name = "train_timm_image_classification"
-        self.info.shortDescription = "Train Timm image classification models"
-        self.info.description = "Dataset format :" \
-                                "dataset_folder" \
-                                "--train" \
-                                "----class_1" \
-                                "----class_2" \
-                                "--val" \
-                                "----class_1" \
-                                "----class_2"
+        self.info.shortDescription = "Train timm image classification models"
+        self.info.description = "Train timm image classification models"
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python"
         self.info.iconPath = "icons/timm.png"

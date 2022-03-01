@@ -24,6 +24,7 @@ from train_timm_image_classification.train_timm_image_classification_process imp
 from PyQt5.QtWidgets import *
 import timm
 
+
 # --------------------
 # - Class which implements widget associated with the process
 # - Inherits PyCore.CWorkflowTaskWidget from Ikomia API
@@ -62,7 +63,8 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
                                                        self.parameters.cfg["pretrained"])
         # Output folder
         self.browse_output_folder = pyqtutils.append_browse_file(self.gridLayout, "Output folder",
-                                                                 self.parameters.cfg["output_folder"])
+                                                                 self.parameters.cfg["output_folder"],
+                                                                 mode=pyqtutils.QFileDialog.Directory)
         # Base learning rate
         self.double_spin_lr = pyqtutils.append_double_spin(self.gridLayout, "Learning rate",
                                                            self.parameters.cfg["learning_rate"], step=1e-4)
@@ -110,7 +112,7 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         self.parameters.cfg["cfg_path"] = self.browse_custom_cfg.path
         self.parameters.cfg["epochs"] = self.spin_epochs.value()
         self.parameters.cfg["batch_size"] = self.spin_batch_size.value()
-        self.parameters.cfg["input_size"] = [self.spin_input_h.value(),self.spin_input_w.value()]
+        self.parameters.cfg["input_size"] = [self.spin_input_h.value(), self.spin_input_w.value()]
         self.parameters.cfg["pretrained"] = self.check_pretrained.isChecked()
         self.parameters.cfg["output_folder"] = self.browse_output_folder.path
         self.parameters.cfg["learning_rate"] = self.double_spin_lr.value()

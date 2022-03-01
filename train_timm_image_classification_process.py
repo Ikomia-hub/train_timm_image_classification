@@ -114,15 +114,19 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         self.stop_train = False
         data_dir = self.getInput(0).getPath()
 
+        if not (os.path.isdir(data_dir)):
+            print("Input for train_timm_image_classification plugin is not correct. "
+                  "Make sure to put a valid path as input")
+
         if not param.cfg["custom_cfg"]:
             args = parser.parse_args([data_dir])
             args.output = os.path.dirname(__file__) + "/output" if param.cfg["output_folder"] == "" else param.cfg[
                 "output_folder"]
             if not os.path.isdir(args.output):
-                os.mkdirs(args.output)
+                os.makedirs(args.output)
 
             num_classes = 0
-            for base, dirs, files in os.walk(param.cfg["dataset_folder"] + "/train"):
+            for base, dirs, files in os.walk(data_dir + "/train"):
                 for directory in dirs:
                     num_classes += 1
             args.model = param.cfg["model_name"]

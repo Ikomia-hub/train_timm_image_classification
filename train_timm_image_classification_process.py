@@ -188,7 +188,7 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         self.info.shortDescription = "Train timm image classification models"
         self.info.description = "Train timm image classification models"
         # relative path -> as displayed in Ikomia application process tree
-        self.info.path = "Plugins/Python"
+        self.info.path = "Plugins/Python/Train"
         self.info.iconPath = "icons/timm.png"
         self.info.version = "1.0.0"
         # self.info.iconPath = "your path to a specific icon"

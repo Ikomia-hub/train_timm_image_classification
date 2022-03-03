@@ -125,13 +125,13 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
             if not os.path.isdir(args.output):
                 os.makedirs(args.output)
 
-            num_classes = 0
+            class_names = []
             for base, dirs, files in os.walk(data_dir + "/train"):
                 for directory in dirs:
-                    num_classes += 1
+                    class_names.append(directory)
             args.model = param.cfg["model_name"]
             args.pretrained = param.cfg["pretrained"]
-            args.num_classes = num_classes
+            args.num_classes = len(class_names)
             args.batch_size = param.cfg["batch_size"]
             args.epochs = param.cfg["epochs"]
             args.prefetcher = not args.no_prefetcher
@@ -147,6 +147,10 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
                 cfg = yaml.safe_load(f)
                 parser.set_defaults(**cfg)
                 args = parser.parse_args([data_dir])
+            class_names = []
+            for base, dirs, files in os.walk(args.data_dir + "/train"):
+                for directory in dirs:
+                    class_names.append(directory)
         else:
             print("Config file " + param.cfg["cfg_file"] + " does not exist")
 
@@ -159,7 +163,7 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         tb_logdir = self.getTensorboardLogDir() + "/" + param.cfg["model_name"] + str(param.cfg["input_size"][0]) \
                     + "/" + str_datetime
         self.tb_writer = SummaryWriter(tb_logdir)
-        train(args, self.get_stop, self.tb_writer, self.log_metrics)
+        train(args, self.get_stop, self.tb_writer, self.log_metrics, class_names)
 
         # Step progress bar:
         self.emitStepProgress()

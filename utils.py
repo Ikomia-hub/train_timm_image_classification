@@ -298,7 +298,7 @@ parser.add_argument('--log-wandb', action='store_true', default=False,
                     help='log training and validation metrics to wandb')
 
 
-def train(args, stop_fct, tb_writer, log_metrics):
+def train(args, stop_fct, tb_writer, log_metrics, class_names):
 
     if args.distributed:
         args.device = 'cuda:%d' % args.local_rank
@@ -571,6 +571,10 @@ def train(args, stop_fct, tb_writer, log_metrics):
         args_text = yaml.safe_dump(args.__dict__, default_flow_style=False)
         with open(os.path.join(output_dir, 'args.yaml'), 'w') as f:
             f.write(args_text)
+
+        with open(os.path.join(output_dir,'class_names.txt'),'w') as f:
+            f.write('\n'.join([cls for cls in class_names]))
+
         decreasing = True if eval_metric == 'loss' else False
         saver = CheckpointSaver(
             model=model, optimizer=optimizer, args=args, model_ema=model_ema, amp_scaler=loss_scaler,

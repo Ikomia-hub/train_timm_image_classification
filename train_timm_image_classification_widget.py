@@ -23,6 +23,7 @@ from train_timm_image_classification.train_timm_image_classification_process imp
 # PyQt GUI framework
 from PyQt5.QtWidgets import *
 import timm
+from train_timm_image_classification.utils import Autocomplete
 
 
 # --------------------
@@ -44,9 +45,10 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
 
         # Model name
         timm_models = timm.list_models()
-        self.combo_model = pyqtutils.append_combo(self.gridLayout, "Model Name")
-        for model in timm_models:
-            self.combo_model.addItem(model)
+        self.combo_model = Autocomplete(timm_models, parent=None, i=True, allow_duplicates=False)
+        self.label_model = QLabel("Model name")
+        self.gridLayout.addWidget(self.combo_model, 0, 1)
+        self.gridLayout.addWidget(self.label_model, 0, 0)
 
         self.combo_model.setCurrentText(self.parameters.cfg["model_name"])
         # Input size

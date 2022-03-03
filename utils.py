@@ -56,6 +56,10 @@ try:
 except ImportError:
     has_wandb = False
 
+import numpy as np
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QComboBox, QCompleter
+
 torch.backends.cudnn.benchmark = True
 _logger = logging.getLogger('train')
 
@@ -299,7 +303,6 @@ parser.add_argument('--log-wandb', action='store_true', default=False,
 
 
 def train(args, stop_fct, tb_writer, log_metrics, class_names):
-
     if args.distributed:
         args.device = 'cuda:%d' % args.local_rank
         torch.cuda.set_device(args.local_rank)
@@ -572,7 +575,7 @@ def train(args, stop_fct, tb_writer, log_metrics, class_names):
         with open(os.path.join(output_dir, 'args.yaml'), 'w') as f:
             f.write(args_text)
 
-        with open(os.path.join(output_dir,'class_names.txt'),'w') as f:
+        with open(os.path.join(output_dir, 'class_names.txt'), 'w') as f:
             f.write('\n'.join([cls for cls in class_names]))
 
         decreasing = True if eval_metric == 'loss' else False
@@ -586,7 +589,7 @@ def train(args, stop_fct, tb_writer, log_metrics, class_names):
                 loader_train.sampler.set_epoch(epoch)
 
             train_metrics = train_one_epoch(
-                epoch, model, loader_train, optimizer, train_loss_fn, args, stop_fct = stop_fct,
+                epoch, model, loader_train, optimizer, train_loss_fn, args, stop_fct=stop_fct,
                 lr_scheduler=lr_scheduler, saver=saver, output_dir=output_dir,
                 amp_autocast=amp_autocast, loss_scaler=loss_scaler, model_ema=model_ema, mixup_fn=mixup_fn)
 
@@ -619,7 +622,7 @@ def train(args, stop_fct, tb_writer, log_metrics, class_names):
                 best_metric, best_epoch = saver.save_checkpoint(epoch, metric=save_metric)
 
             if tb_writer is not None:
-                tb_writer.add_scalar('loss_train',train_metrics['loss'], epoch)
+                tb_writer.add_scalar('loss_train', train_metrics['loss'], epoch)
                 tb_writer.add_scalar('loss_eval', eval_metrics['loss'], epoch)
                 tb_writer.add_scalar('top1', eval_metrics['top1'], epoch)
                 tb_writer.add_scalar('top5', eval_metrics['top5'], epoch)
@@ -810,3 +813,31 @@ def validate(model, loader, loss_fn, args, amp_autocast=suppress, log_suffix='')
     return metrics
 
 
+def completion(word_list, widget, i=True):
+    """ Autocompletion of sender and subject """
+    word_set = set(word_list)
+    completer = QCompleter(word_set)
+    if i:
+        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+    else:
+        completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
+    completer.setFilterMode(QtCore.Qt.MatchFlag.MatchContains)
+    widget.setCompleter(completer)
+
+
+class Autocomplete(QComboBox):
+    def __init__(self, items, parent=None, i=False, allow_duplicates=True):
+        super(Autocomplete, self).__init__(parent)
+        self.items = items
+        self.insensitivity = i
+        self.allowDuplicates = allow_duplicates
+        self.init()
+
+    def init(self):
+        self.setEditable(True)
+        self.setDuplicatesEnabled(self.allowDuplicates)
+        self.addItems(self.items)
+        self.setAutocompletion(self.items, i=self.insensitivity)
+
+    def setAutocompletion(self, items, i):
+        completion(items, self, i)

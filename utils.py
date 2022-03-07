@@ -56,8 +56,7 @@ try:
 except ImportError:
     has_wandb = False
 
-import numpy as np
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QComboBox, QCompleter
 
 torch.backends.cudnn.benchmark = True
@@ -70,6 +69,8 @@ parser.add_argument('-c', '--config', default='', type=str, metavar='FILE',
                     help='YAML config file specifying default arguments')
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
+parser.add_argument('-train-backbone', '--train-backbone', action='store_true', default=True,
+                    help='only train last layer (default: None)')
 
 # Dataset parameters
 parser.add_argument('data_dir', metavar='DIR',
@@ -393,6 +394,10 @@ def train(args, stop_fct, tb_writer, log_metrics, class_names):
         assert not args.sync_bn, 'Cannot use SyncBatchNorm with torchscripted model'
         model = torch.jit.script(model)
 
+    if not args.train_backbone:
+        for p in [p for p in model.parameters()][:-2]:
+            p.requires_grad = False
+
     optimizer = create_optimizer_v2(model, **optimizer_kwargs(cfg=args))
 
     # setup automatic mixed-precision (AMP) loss scaling and op casting
@@ -628,8 +633,10 @@ def train(args, stop_fct, tb_writer, log_metrics, class_names):
                 tb_writer.add_scalar('top5', eval_metrics['top5'], epoch)
 
             if log_metrics is not None:
-                log_metrics(train_metrics)
-                log_metrics(eval_metrics)
+                mlflow_metrics = {'loss_train': train_metrics['loss'],
+                                  'loss_eval': eval_metrics['loss'],
+                                  'top1': eval_metrics['top1']}
+                log_metrics(mlflow_metrics)
 
             if stop_fct():
                 break
@@ -677,17 +684,19 @@ def train_one_epoch(
             losses_m.update(loss.item(), input.size(0))
 
         optimizer.zero_grad()
+        parameters = model_parameters(model, exclude_head='agc' in args.clip_mode) if args.train_backbone else \
+            [p for p in model.parameters()][:-2]
         if loss_scaler is not None:
             loss_scaler(
                 loss, optimizer,
                 clip_grad=args.clip_grad, clip_mode=args.clip_mode,
-                parameters=model_parameters(model, exclude_head='agc' in args.clip_mode),
+                parameters=parameters,
                 create_graph=second_order)
         else:
             loss.backward(create_graph=second_order)
             if args.clip_grad is not None:
                 dispatch_clip_grad(
-                    model_parameters(model, exclude_head='agc' in args.clip_mode),
+                    parameters,
                     value=args.clip_grad, mode=args.clip_mode)
             optimizer.step()
 

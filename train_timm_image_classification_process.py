@@ -41,12 +41,13 @@ class TrainTimmImageClassificationParam(TaskParam):
         self.cfg["model_name"] = "resnet18"
         self.cfg["custom_cfg"] = False
         self.cfg["cfg_path"] = ""
-        self.cfg["epochs"] = 10
-        self.cfg["batch_size"] = 4
+        self.cfg["epochs"] = 100
+        self.cfg["batch_size"] = 16
         self.cfg["input_size"] = [224, 224]
         self.cfg["pretrained"] = True
         self.cfg["output_folder"] = ""
-        self.cfg["learning_rate"] = 0.05
+        self.cfg["learning_rate"] = 0.005
+        self.cfg["train_backbone"] = True
 
     def setParamMap(self, param_map):
         # Set parameters values from Ikomia application
@@ -61,6 +62,7 @@ class TrainTimmImageClassificationParam(TaskParam):
         self.cfg["pretrained"] = eval(param_map["pretrained"])
         self.cfg["output_folder"] = param_map["output_folder"]
         self.cfg["learning_rate"] = float(param_map["learning_rate"])
+        self.cfg["train_backbone"] = eval(param_map["train_backbone"])
 
     def getParamMap(self):
         # Send parameters values to Ikomia application
@@ -76,6 +78,7 @@ class TrainTimmImageClassificationParam(TaskParam):
         param_map["pretrained"] = str(self.cfg["pretrained"])
         param_map["output_folder"] = self.cfg["output_folder"]
         param_map["learning_rate"] = self.cfg["learning_rate"]
+        param_map["train_backbone"] = str(self.cfg["train_backbone"])
         return param_map
 
 
@@ -141,6 +144,7 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
             args.cooldown_epochs = 10 if args.epochs > 10 else 0
             args.epochs = args.epochs - args.cooldown_epochs
             args.no_aug = True
+            args.train_backbone = param.cfg["train_backbone"]
 
         elif os.path.isfile(param.cfg["cfg_path"]):
             with open(param.cfg["cfg_path"], 'r') as f:

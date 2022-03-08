@@ -95,6 +95,10 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         self.addInput(dataprocess.CPathIO(core.IODataType.FOLDER_PATH))
         self.stop_train = False
         self.tb_writer = None
+        self.epochs_done = None
+        self.epochs_todo = None
+        # Percentage of training done for display purpose
+        self.advancement = 0
         # Create parameters class
         if param is None:
             self.setParam(TrainTimmImageClassificationParam())
@@ -104,7 +108,14 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
     def getProgressSteps(self, eltCount=1):
         # Function returning the number of progress steps for this process
         # This is handled by the main progress bar of Ikomia application
-        return 1
+        return 100
+
+    def update_progress(self):
+        self.epochs_done += 1
+        steps = range(self.advancement, int(100 * self.epochs_done / self.epochs_todo))
+        for step in steps:
+            self.emitStepProgress()
+            self.advancement += 1
 
     def run(self):
         # Core function of your process
@@ -167,7 +178,10 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         tb_logdir = self.getTensorboardLogDir() + "/" + param.cfg["model_name"] + str(param.cfg["input_size"][0]) \
                     + "/" + str_datetime
         self.tb_writer = SummaryWriter(tb_logdir)
-        train(args, self.get_stop, self.tb_writer, self.log_metrics, class_names)
+        self.advancement = 0
+        self.epochs_todo = args.epochs + args.cooldown_epochs
+        self.epochs_done = 0
+        train(args, self.get_stop, self.tb_writer, self.log_metrics, class_names, self.update_progress)
 
         # Step progress bar:
         self.emitStepProgress()

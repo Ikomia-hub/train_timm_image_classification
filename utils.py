@@ -307,7 +307,7 @@ parser.add_argument('--log-wandb', action='store_true', default=False,
                     help='log training and validation metrics to wandb')
 
 
-def train(args, stop_fct, tb_writer, log_metrics, class_names):
+def train(args, stop_fct, tb_writer, log_metrics, class_names, update_progress):
     if args.distributed:
         args.device = 'cuda:%d' % args.local_rank
         torch.cuda.set_device(args.local_rank)
@@ -601,6 +601,8 @@ def train(args, stop_fct, tb_writer, log_metrics, class_names):
                 epoch, model, loader_train, optimizer, train_loss_fn, args, stop_fct=stop_fct,
                 lr_scheduler=lr_scheduler, saver=saver, output_dir=output_dir,
                 amp_autocast=amp_autocast, loss_scaler=loss_scaler, model_ema=model_ema, mixup_fn=mixup_fn)
+
+            update_progress()
 
             if args.distributed and args.dist_bn in ('broadcast', 'reduce'):
                 if args.local_rank == 0:

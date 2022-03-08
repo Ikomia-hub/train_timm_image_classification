@@ -13,6 +13,7 @@ Hacked together by / Copyright 2020 Ross Wightman (https://github.com/rwightman)
 import argparse
 import time
 import os
+import sys
 import logging
 from collections import OrderedDict
 from contextlib import suppress
@@ -61,6 +62,9 @@ from PyQt5.QtWidgets import QComboBox, QCompleter
 
 torch.backends.cudnn.benchmark = True
 _logger = logging.getLogger('train')
+
+if len(sys.argv) == 0:
+    sys.argv = ["ikomia"]
 
 # The first arg parser parses out only the --config argument, this argument is used to
 # load a yaml file containing key-values that override the defaults for the main parser below

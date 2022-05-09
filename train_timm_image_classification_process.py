@@ -175,8 +175,10 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         args.world_size = 1
         args.rank = 0  # global rank
         str_datetime = datetime.now().strftime("%d-%m-%YT%Hh%Mm%Ss")
-        tb_logdir = self.getTensorboardLogDir() + "/" + param.cfg["model_name"] + str(param.cfg["input_size"][0]) \
-                    + "/" + str_datetime
+        tb_logdir = os.path.join(core.config.main_cfg["tensorboard"]["log_uri"],
+                                 param.cfg["model_name"],
+                                 str(param.cfg["input_size"][0]),
+                                 str_datetime)
         self.tb_writer = SummaryWriter(tb_logdir)
         self.advancement = 0
         self.epochs_todo = args.epochs + args.cooldown_epochs

@@ -57,9 +57,6 @@ try:
 except ImportError:
     has_wandb = False
 
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QComboBox, QCompleter
-
 torch.backends.cudnn.benchmark = True
 _logger = logging.getLogger('train')
 
@@ -826,33 +823,3 @@ def validate(model, loader, loss_fn, args, amp_autocast=suppress, log_suffix='')
     metrics = OrderedDict([('loss', losses_m.avg), ('top1', top1_m.avg), ('top5', top5_m.avg)])
 
     return metrics
-
-
-def completion(word_list, widget, i=True):
-    """ Autocompletion of sender and subject """
-    word_set = set(word_list)
-    completer = QCompleter(word_set)
-    if i:
-        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-    else:
-        completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
-    completer.setFilterMode(QtCore.Qt.MatchFlag.MatchContains)
-    widget.setCompleter(completer)
-
-
-class Autocomplete(QComboBox):
-    def __init__(self, items, parent=None, i=False, allow_duplicates=True):
-        super(Autocomplete, self).__init__(parent)
-        self.items = items
-        self.insensitivity = i
-        self.allowDuplicates = allow_duplicates
-        self.init()
-
-    def init(self):
-        self.setEditable(True)
-        self.setDuplicatesEnabled(self.allowDuplicates)
-        self.addItems(self.items)
-        self.setAutocompletion(self.items, i=self.insensitivity)
-
-    def setAutocompletion(self, items, i):
-        completion(items, self, i)

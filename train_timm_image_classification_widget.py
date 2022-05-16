@@ -23,7 +23,7 @@ from train_timm_image_classification.train_timm_image_classification_process imp
 # PyQt GUI framework
 from PyQt5.QtWidgets import *
 import timm
-from train_timm_image_classification.utils import Autocomplete
+from train_timm_image_classification.utils_ui import Autocomplete
 
 
 # --------------------

@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import torch.cuda
 from ikomia import core, dataprocess
-from ikomia.dnn import datasetio, dnntrain
+from ikomia.dnn import dnntrain
 from ikomia.core.task import TaskParam
 import copy
 # Your imports below

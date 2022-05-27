@@ -77,7 +77,7 @@ class TrainTimmImageClassificationParam(TaskParam):
         param_map["input_size"] = str(self.cfg["input_size"])
         param_map["pretrained"] = str(self.cfg["pretrained"])
         param_map["output_folder"] = self.cfg["output_folder"]
-        param_map["learning_rate"] = self.cfg["learning_rate"]
+        param_map["learning_rate"] = str(self.cfg["learning_rate"])
         param_map["train_backbone"] = str(self.cfg["train_backbone"])
         return param_map
 

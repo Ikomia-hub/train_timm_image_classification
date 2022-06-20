@@ -1,9 +1,6 @@
 import logging
 from ikomia.core import task, ParamMap
 from ikomia.utils.tests import run_for_test
-import os
-import ikomia
-import yaml
 
 logger = logging.getLogger(__name__)
 

@@ -13,6 +13,6 @@ def test(t, data_dict):
         params = task.get_parameters(t)
         params["model_name"] = model_name
         params["epochs"] = 1
-        params["batch_size"] = 2
+        params["batch_size"] = 1
         task.set_parameters(t, params)
         yield run_for_test(t)

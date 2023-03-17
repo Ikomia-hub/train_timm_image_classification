@@ -49,7 +49,7 @@ class TrainTimmImageClassificationParam(TaskParam):
         self.cfg["learning_rate"] = 0.005
         self.cfg["train_backbone"] = True
 
-    def setParamMap(self, param_map):
+    def set_values(self, param_map):
         # Set parameters values from Ikomia application
         # Parameters values are stored as string and accessible like a python dict
         # Example : self.windowSize = int(param_map["windowSize"])
@@ -64,10 +64,10 @@ class TrainTimmImageClassificationParam(TaskParam):
         self.cfg["learning_rate"] = float(param_map["learning_rate"])
         self.cfg["train_backbone"] = eval(param_map["train_backbone"])
 
-    def getParamMap(self):
+    def get_values(self):
         # Send parameters values to Ikomia application
         # Create the specific dict structure (string container)
-        param_map = core.ParamMap()
+        param_map = {}
         # Example : paramMap["windowSize"] = str(self.windowSize)
         param_map["model_name"] = self.cfg["model_name"]
         param_map["custom_cfg"] = str(self.cfg["custom_cfg"])
@@ -91,8 +91,8 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
     def __init__(self, name, param):
         dnntrain.TrainProcess.__init__(self, name, param)
         # remove default input
-        self.removeInput(0)
-        self.addInput(dataprocess.CPathIO(core.IODataType.FOLDER_PATH))
+        self.remove_input(0)
+        self.add_input(dataprocess.CPathIO(core.IODataType.FOLDER_PATH))
         self.stop_train = False
         self.tb_writer = None
         self.epochs_done = None
@@ -101,11 +101,11 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         self.advancement = 0
         # Create parameters class
         if param is None:
-            self.setParam(TrainTimmImageClassificationParam())
+            self.set_param_object(TrainTimmImageClassificationParam())
         else:
-            self.setParam(copy.deepcopy(param))
+            self.set_param_object(copy.deepcopy(param))
 
-    def getProgressSteps(self):
+    def get_progress_steps(self):
         # Function returning the number of progress steps for this process
         # This is handled by the main progress bar of Ikomia application
         return 100
@@ -114,19 +114,19 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         self.epochs_done += 1
         steps = range(self.advancement, int(100 * self.epochs_done / self.epochs_todo))
         for step in steps:
-            self.emitStepProgress()
+            self.emit_step_progress()
             self.advancement += 1
 
     def run(self):
         # Core function of your process
-        # Call beginTaskRun for initialization
-        self.beginTaskRun()
+        # Call begin_task_run for initialization
+        self.begin_task_run()
 
         # Get parameters :
-        param = self.getParam()
+        param = self.get_param_object()
 
         self.stop_train = False
-        data_dir = self.getInput(0).getPath()
+        data_dir = self.get_input(0).get_path()
 
         if not (os.path.isdir(data_dir)):
             print("Input for train_timm_image_classification plugin is not correct. "
@@ -186,10 +186,10 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         train(args, self.get_stop, self.tb_writer, self.log_metrics, class_names, self.update_progress)
 
         # Step progress bar:
-        self.emitStepProgress()
+        self.emit_step_progress()
 
-        # Call endTaskRun to finalize process
-        self.endTaskRun()
+        # Call end_task_run to finalize process
+        self.end_task_run()
 
     def get_stop(self):
         return self.stop_train
@@ -209,20 +209,20 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         dataprocess.CTaskFactory.__init__(self)
         # Set process information as string here
         self.info.name = "train_timm_image_classification"
-        self.info.shortDescription = "Train timm image classification models"
+        self.info.short_description = "Train timm image classification models"
         self.info.description = "Train timm image classification models"
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
-        self.info.iconPath = "icons/timm.png"
-        self.info.version = "1.0.2"
-        # self.info.iconPath = "your path to a specific icon"
+        self.info.icon_path = "icons/timm.png"
+        self.info.version = "1.1.0"
+        # self.info.icon_path = "your path to a specific icon"
         self.info.authors = "Ross Wightman"
         self.info.article = "PyTorch Image Models"
         self.info.journal = "GitHub repository"
         self.info.year = 2019
         self.info.license = "Apache-2.0 License "
         # URL of documentation
-        self.info.documentationLink = "https://rwightman.github.io/pytorch-image-models/"
+        self.info.documentation_link = "https://rwightman.github.io/pytorch-image-models/"
         # Code source repository
         self.info.repository = "https://github.com/rwightman/pytorch-image-models"
         # Keywords used for search

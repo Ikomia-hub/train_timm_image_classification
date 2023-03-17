@@ -95,7 +95,7 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         layout_ptr = qtconversion.PyQtToQt(self.gridLayout)
 
         # Set widget layout
-        self.setLayout(layout_ptr)
+        self.set_layout(layout_ptr)
 
     def on_check(self, int):
         self.browse_custom_cfg.setEnabled(self.check_custom_cfg.isChecked())
@@ -109,7 +109,7 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         self.combo_model.setEnabled(not self.check_custom_cfg.isChecked())
         self.check_backbone.setEnabled(not self.check_backbone.isChecked())
 
-    def onApply(self):
+    def on_apply(self):
         # Apply button clicked slot
 
         # Get parameters from widget
@@ -126,7 +126,7 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         self.parameters.cfg["train_backbone"] = self.check_backbone.isChecked()
 
         # Send signal to launch the process
-        self.emitApply(self.parameters)
+        self.emit_apply(self.parameters)
 
 
 # --------------------

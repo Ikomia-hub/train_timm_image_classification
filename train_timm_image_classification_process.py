@@ -39,12 +39,12 @@ class TrainTimmImageClassificationParam(TaskParam):
         # Place default value initialization here
         # Example : self.windowSize = 25
         self.cfg["model_name"] = "resnet18"
-        self.cfg["custom_cfg"] = False
-        self.cfg["cfg_path"] = ""
+        self.cfg["use_custom_cfg"] = False
+        self.cfg["config"] = ""
         self.cfg["epochs"] = 100
         self.cfg["batch_size"] = 16
         self.cfg["input_size"] = [224, 224]
-        self.cfg["pretrained"] = True
+        self.cfg["use_pretrained"] = True
         self.cfg["output_folder"] = ""
         self.cfg["learning_rate"] = 0.005
         self.cfg["train_backbone"] = True
@@ -54,12 +54,12 @@ class TrainTimmImageClassificationParam(TaskParam):
         # Parameters values are stored as string and accessible like a python dict
         # Example : self.windowSize = int(param_map["windowSize"])
         self.cfg["model_name"] = param_map["model_name"]
-        self.cfg["custom_cfg"] = eval(param_map["custom_cfg"])
-        self.cfg["cfg_path"] = param_map["cfg_path"]
+        self.cfg["use_custom_cfg"] = eval(param_map["use_custom_cfg"])
+        self.cfg["config"] = param_map["config"]
         self.cfg["epochs"] = int(param_map["epochs"])
         self.cfg["batch_size"] = int(param_map["batch_size"])
         self.cfg["input_size"] = eval(param_map["input_size"])
-        self.cfg["pretrained"] = eval(param_map["pretrained"])
+        self.cfg["use_pretrained"] = eval(param_map["use_pretrained"])
         self.cfg["output_folder"] = param_map["output_folder"]
         self.cfg["learning_rate"] = float(param_map["learning_rate"])
         self.cfg["train_backbone"] = eval(param_map["train_backbone"])
@@ -70,12 +70,12 @@ class TrainTimmImageClassificationParam(TaskParam):
         param_map = {}
         # Example : paramMap["windowSize"] = str(self.windowSize)
         param_map["model_name"] = self.cfg["model_name"]
-        param_map["custom_cfg"] = str(self.cfg["custom_cfg"])
-        param_map["cfg_path"] = self.cfg["cfg_path"]
+        param_map["use_custom_cfg"] = str(self.cfg["use_custom_cfg"])
+        param_map["config"] = self.cfg["config"]
         param_map["epochs"] = str(self.cfg["epochs"])
         param_map["batch_size"] = str(self.cfg["batch_size"])
         param_map["input_size"] = str(self.cfg["input_size"])
-        param_map["pretrained"] = str(self.cfg["pretrained"])
+        param_map["use_pretrained"] = str(self.cfg["use_pretrained"])
         param_map["output_folder"] = self.cfg["output_folder"]
         param_map["learning_rate"] = str(self.cfg["learning_rate"])
         param_map["train_backbone"] = str(self.cfg["train_backbone"])
@@ -132,7 +132,7 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
             print("Input for train_timm_image_classification plugin is not correct. "
                   "Make sure to put a valid path as input")
 
-        if not param.cfg["custom_cfg"]:
+        if not param.cfg["use_custom_cfg"]:
             args = parser.parse_args([data_dir])
             args.output = os.path.dirname(__file__) + "/output" if param.cfg["output_folder"] == "" else param.cfg[
                 "output_folder"]
@@ -144,7 +144,7 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
                 for directory in dirs:
                     class_names.append(directory)
             args.model = param.cfg["model_name"]
-            args.pretrained = param.cfg["pretrained"]
+            args.pretrained = param.cfg["use_pretrained"]
             args.num_classes = len(class_names)
             args.batch_size = param.cfg["batch_size"]
             args.epochs = param.cfg["epochs"]
@@ -157,8 +157,8 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
             args.no_aug = True
             args.train_backbone = param.cfg["train_backbone"]
 
-        elif os.path.isfile(param.cfg["cfg_path"]):
-            with open(param.cfg["cfg_path"], 'r') as f:
+        elif os.path.isfile(param.cfg["config"]):
+            with open(param.cfg["config"], 'r') as f:
                 cfg = yaml.safe_load(f)
                 parser.set_defaults(**cfg)
                 args = parser.parse_args([data_dir])

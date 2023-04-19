@@ -62,7 +62,7 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         self.spin_batch_size = pyqtutils.append_spin(self.gridLayout, "Batch size", self.parameters.cfg["batch_size"])
         # Pretrain
         self.check_pretrained = pyqtutils.append_check(self.gridLayout, "Pretrained on Imagenet",
-                                                       self.parameters.cfg["pretrained"])
+                                                       self.parameters.cfg["use_pretrained"])
         # Backbone
         self.check_backbone = pyqtutils.append_check(self.gridLayout, "Train backbone",
                                                      self.parameters.cfg["train_backbone"])
@@ -75,10 +75,10 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
                                                            self.parameters.cfg["learning_rate"], step=1e-4)
         # Custom config
         self.check_custom_cfg = pyqtutils.append_check(self.gridLayout, "Enable expert mode",
-                                                       self.parameters.cfg["custom_cfg"])
+                                                       self.parameters.cfg["use_custom_cfg"])
 
         self.browse_custom_cfg = pyqtutils.append_browse_file(self.gridLayout, "Custom config path",
-                                                              self.parameters.cfg["cfg_path"])
+                                                              self.parameters.cfg["config"])
         # Disable unused widgets when custom config checkbox is checked
         self.browse_custom_cfg.setEnabled(self.check_custom_cfg.isChecked())
         self.double_spin_lr.setEnabled(not self.check_custom_cfg.isChecked())
@@ -115,12 +115,12 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         # Get parameters from widget
         # Example : self.parameters.windowSize = self.spinWindowSize.value()
         self.parameters.cfg["model_name"] = self.combo_model.currentText()
-        self.parameters.cfg["custom_cfg"] = self.check_custom_cfg.isChecked()
-        self.parameters.cfg["cfg_path"] = self.browse_custom_cfg.path
+        self.parameters.cfg["use_custom_cfg"] = self.check_custom_cfg.isChecked()
+        self.parameters.cfg["config"] = self.browse_custom_cfg.path
         self.parameters.cfg["epochs"] = self.spin_epochs.value()
         self.parameters.cfg["batch_size"] = self.spin_batch_size.value()
         self.parameters.cfg["input_size"] = [self.spin_input_h.value(), self.spin_input_w.value()]
-        self.parameters.cfg["pretrained"] = self.check_pretrained.isChecked()
+        self.parameters.cfg["use_pretrained"] = self.check_pretrained.isChecked()
         self.parameters.cfg["output_folder"] = self.browse_output_folder.path
         self.parameters.cfg["learning_rate"] = self.double_spin_lr.value()
         self.parameters.cfg["train_backbone"] = self.check_backbone.isChecked()

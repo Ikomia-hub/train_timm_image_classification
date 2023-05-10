@@ -40,7 +40,7 @@ class TrainTimmImageClassificationParam(TaskParam):
         # Example : self.windowSize = 25
         self.cfg["model_name"] = "resnet18"
         self.cfg["use_custom_cfg"] = False
-        self.cfg["config"] = ""
+        self.cfg["config_file"] = ""
         self.cfg["epochs"] = 100
         self.cfg["batch_size"] = 16
         self.cfg["input_size"] = [224, 224]
@@ -55,7 +55,7 @@ class TrainTimmImageClassificationParam(TaskParam):
         # Example : self.windowSize = int(param_map["windowSize"])
         self.cfg["model_name"] = param_map["model_name"]
         self.cfg["use_custom_cfg"] = eval(param_map["use_custom_cfg"])
-        self.cfg["config"] = param_map["config"]
+        self.cfg["config_file"] = param_map["config_file"]
         self.cfg["epochs"] = int(param_map["epochs"])
         self.cfg["batch_size"] = int(param_map["batch_size"])
         self.cfg["input_size"] = eval(param_map["input_size"])
@@ -71,7 +71,7 @@ class TrainTimmImageClassificationParam(TaskParam):
         # Example : paramMap["windowSize"] = str(self.windowSize)
         param_map["model_name"] = self.cfg["model_name"]
         param_map["use_custom_cfg"] = str(self.cfg["use_custom_cfg"])
-        param_map["config"] = self.cfg["config"]
+        param_map["config_file"] = self.cfg["config_file"]
         param_map["epochs"] = str(self.cfg["epochs"])
         param_map["batch_size"] = str(self.cfg["batch_size"])
         param_map["input_size"] = str(self.cfg["input_size"])
@@ -157,8 +157,8 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
             args.no_aug = True
             args.train_backbone = param.cfg["train_backbone"]
 
-        elif os.path.isfile(param.cfg["config"]):
-            with open(param.cfg["config"], 'r') as f:
+        elif os.path.isfile(param.cfg["config_file"]):
+            with open(param.cfg["config_file"], 'r') as f:
                 cfg = yaml.safe_load(f)
                 parser.set_defaults(**cfg)
                 args = parser.parse_args([data_dir])

@@ -19,10 +19,9 @@
     </a> 
 </p>
 
-Train timm image classification models
+Train timm image classification models.
 
-[Insert illustrative image here. Image must be accessible publicly, in algorithm Github repository for example.
-<img src="images/illustration.png"  alt="Illustrative image" width="30%" height="30%">]
+![Rock paper scissors](https://uploads-ssl.webflow.com/645cec60ffb18d5ebb37da4b/64e480470f4a9d7b0a3198fb_Picture23-p-800.jpg)
 
 ## :rocket: Use with Ikomia API
 
@@ -36,20 +35,24 @@ pip install ikomia
 
 #### 2. Create your workflow
 
-[Change the sample image URL to fit algorithm purpose]
 
 ```python
-import ikomia
 from ikomia.dataprocess.workflow import Workflow
 
 # Init your workflow
-wf = Workflow()
+wf = Workflow()    
 
-# Add algorithm
-algo = wf.add_task(name="train_timm_image_classification", auto_connect=True)
+# Add dataset loader
+data_loader = wf.add_task(name="dataset_classification")
 
-# Run on your image  
-wf.run_on(url="example_image.png")
+data_loader.set_parameters({
+    "dataset_folder": "path/to/dataset/folder",
+}) 
+
+train = wf.add_task(name="train_timm_image_classification", auto_connect=True)
+
+# Launch your training on your data
+wf.run()
 ```
 
 ## :sunny: Use with Ikomia Studio
@@ -62,56 +65,40 @@ Ikomia Studio offers a friendly UI with the same features as the API.
 
 ## :pencil: Set algorithm parameters
 
-[Explain each algorithm parameters]
+- **model_name** (str) - default 'resnet18': Name of the pre-trained model. 
+    - There are over 700 timm models. You can list them using: timm.list_models()
+- **input_size** (list) - default '[224, 224]': Size of the input image.
+- **epochs** (int) - default '100': Number of complete passes through the training dataset.
+- **batch_size** (int) - default '16': Number of samples processed before the model is updated.
+- **learning_rate** (float) - default '0.0050': Step size at which the model's parameters are updated during training.
+- **output_folder** (str, *optional*): path to where the model will be saved. 
 
-[Change the sample image URL to fit algorithm purpose]
+
+**Parameters** should be in **strings format**  when added to the dictionary.
+
 
 ```python
-import ikomia
 from ikomia.dataprocess.workflow import Workflow
 
 # Init your workflow
-wf = Workflow()
+wf = Workflow()    
 
-# Add algorithm
-algo = wf.add_task(name="train_timm_image_classification", auto_connect=True)
+# Add dataset loader
+data_loader = wf.add_task(name="dataset_classification")
 
-algo.set_parameters({
-    "param1": "value1",
-    "param2": "value2",
-    ...
-})
+data_loader.set_parameters({
+    "dataset_folder": "C:/Users/allan/OneDrive/Desktop/ik-desktop/Images/datasets/Fruit",
+}) 
 
-# Run on your image  
-wf.run_on(url="example_image.png")
-
+# Add train algorithm 
+train = wf.add_task(name="train_timm_image_classification", auto_connect=True)
+train.set_parameters({
+    "model_name": "resnet34",
+    "batch_size": "8",
+    "epochs": "5",
+    "learning_rate": "0.0050",
+}) 
+# Launch your training on your data
+wf.run()
 ```
 
-## :mag: Explore algorithm outputs
-
-Every algorithm produces specific outputs, yet they can be explored them the same way using the Ikomia API. For a more in-depth understanding of managing algorithm outputs, please refer to the [documentation](https://ikomia-dev.github.io/python-api-documentation/advanced_guide/IO_management.html).
-
-```python
-import ikomia
-from ikomia.dataprocess.workflow import Workflow
-
-# Init your workflow
-wf = Workflow()
-
-# Add algorithm
-algo = wf.add_task(name="train_timm_image_classification", auto_connect=True)
-
-# Run on your image  
-wf.run_on(url="example_image.png")
-
-# Iterate over outputs
-for output in algo.get_outputs()
-    # Print information
-    print(output)
-    # Export it to JSON
-    output.to_json()
-```
-
-## :fast_forward: Advanced usage 
-
-[optional]

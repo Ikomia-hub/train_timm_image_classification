@@ -210,7 +210,6 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         # Set process information as string here
         self.info.name = "train_timm_image_classification"
         self.info.short_description = "Train timm image classification models"
-        self.info.description = "Train timm image classification models"
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
         self.info.icon_path = "icons/timm.png"
@@ -224,7 +223,8 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         # URL of documentation
         self.info.documentation_link = "https://rwightman.github.io/pytorch-image-models/"
         # Code source repository
-        self.info.repository = "https://github.com/rwightman/pytorch-image-models"
+        self.info.repository = "https://github.com/Ikomia-hub/train_timm_image_classification"
+        self.info.original_repository = "https://github.com/rwightman/pytorch-image-models"
         # Keywords used for search
         self.info.keywords = "image, classification, imagenet, pretrain, pytorch"
 

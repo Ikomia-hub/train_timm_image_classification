@@ -227,6 +227,8 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         self.info.original_repository = "https://github.com/rwightman/pytorch-image-models"
         # Keywords used for search
         self.info.keywords = "image, classification, imagenet, pretrain, pytorch"
+        self.info.algo_type = core.AlgoType.TRAIN
+        self.info.algo_tasks = "CLASSIFICATION"
 
     def create(self, param=None):
         # Create process object

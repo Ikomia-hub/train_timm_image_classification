@@ -26,7 +26,7 @@ class Autocomplete(QComboBox):
         self.setEditable(True)
         self.setDuplicatesEnabled(self.allowDuplicates)
         self.addItems(self.items)
-        self.setAutocompletion(self.items, i=self.insensitivity)
+        self.set_autocompletion(self.items, i=self.insensitivity)
 
-    def setAutocompletion(self, items, i):
+    def set_autocompletion(self, items, i):
         completion(items, self, i)

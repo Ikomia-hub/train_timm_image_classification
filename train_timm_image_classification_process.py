@@ -15,17 +15,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import copy
+import os
+import yaml
+from datetime import datetime
+
 import torch.cuda
+from torch.utils.tensorboard import SummaryWriter
+
 from ikomia import core, dataprocess
 from ikomia.dnn import dnntrain
 from ikomia.core.task import TaskParam
-import copy
-# Your imports below
-from train_timm_image_classification.utils import train, parser
-import os
-import yaml
-from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
+
+from train_timm_image_classification.core.train import train, parser
 
 
 # --------------------
@@ -37,7 +39,6 @@ class TrainTimmImageClassificationParam(TaskParam):
     def __init__(self):
         TaskParam.__init__(self)
         # Place default value initialization here
-        # Example : self.windowSize = 25
         self.cfg["model_name"] = "resnet18"
         self.cfg["use_custom_cfg"] = False
         self.cfg["config_file"] = ""
@@ -46,13 +47,13 @@ class TrainTimmImageClassificationParam(TaskParam):
         self.cfg["input_size"] = [224, 224]
         self.cfg["use_pretrained"] = True
         self.cfg["output_folder"] = ""
+        self.cfg["optimizer"] = "adamw"
         self.cfg["learning_rate"] = 0.005
         self.cfg["train_backbone"] = True
 
     def set_values(self, param_map):
         # Set parameters values from Ikomia application
         # Parameters values are stored as string and accessible like a python dict
-        # Example : self.windowSize = int(param_map["windowSize"])
         self.cfg["model_name"] = param_map["model_name"]
         self.cfg["use_custom_cfg"] = eval(param_map["use_custom_cfg"])
         self.cfg["config_file"] = param_map["config_file"]
@@ -61,24 +62,26 @@ class TrainTimmImageClassificationParam(TaskParam):
         self.cfg["input_size"] = eval(param_map["input_size"])
         self.cfg["use_pretrained"] = eval(param_map["use_pretrained"])
         self.cfg["output_folder"] = param_map["output_folder"]
+        self.cfg["optimizer"] = param_map["optimizer"]
         self.cfg["learning_rate"] = float(param_map["learning_rate"])
         self.cfg["train_backbone"] = eval(param_map["train_backbone"])
 
     def get_values(self):
         # Send parameters values to Ikomia application
         # Create the specific dict structure (string container)
-        param_map = {}
-        # Example : paramMap["windowSize"] = str(self.windowSize)
-        param_map["model_name"] = self.cfg["model_name"]
-        param_map["use_custom_cfg"] = str(self.cfg["use_custom_cfg"])
-        param_map["config_file"] = self.cfg["config_file"]
-        param_map["epochs"] = str(self.cfg["epochs"])
-        param_map["batch_size"] = str(self.cfg["batch_size"])
-        param_map["input_size"] = str(self.cfg["input_size"])
-        param_map["use_pretrained"] = str(self.cfg["use_pretrained"])
-        param_map["output_folder"] = self.cfg["output_folder"]
-        param_map["learning_rate"] = str(self.cfg["learning_rate"])
-        param_map["train_backbone"] = str(self.cfg["train_backbone"])
+        param_map = {
+            "model_name": self.cfg["model_name"],
+            "use_custom_cfg": str(self.cfg["use_custom_cfg"]),
+            "config_file": self.cfg["config_file"],
+            "epochs": str(self.cfg["epochs"]),
+            "batch_size": str(self.cfg["batch_size"]),
+            "input_size": str(self.cfg["input_size"]),
+            "use_pretrained": str(self.cfg["use_pretrained"]),
+            "output_folder": self.cfg["output_folder"],
+            "optimizer": self.cfg["optimizer"],
+            "learning_rate": str(self.cfg["learning_rate"]),
+            "train_backbone": str(self.cfg["train_backbone"])
+        }
         return param_map
 
 
@@ -95,10 +98,10 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         self.add_input(dataprocess.CPathIO(core.IODataType.FOLDER_PATH))
         self.stop_train = False
         self.tb_writer = None
-        self.epochs_done = None
-        self.epochs_todo = None
-        # Percentage of training done for display purpose
-        self.advancement = 0
+        self.epochs = 0
+        self.epochs_done = 0
+        self.progress_steps = 100
+        self.previous_progress_step = 0
         # Create parameters class
         if param is None:
             self.set_param_object(TrainTimmImageClassificationParam())
@@ -108,14 +111,17 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
     def get_progress_steps(self):
         # Function returning the number of progress steps for this process
         # This is handled by the main progress bar of Ikomia application
-        return 100
+        return self.progress_steps
 
     def update_progress(self):
-        self.epochs_done += 1
-        steps = range(self.advancement, int(100 * self.epochs_done / self.epochs_todo))
-        for step in steps:
+        step = self.epochs_done * self.progress_steps / self.epochs
+        diff = int(step - self.previous_progress_step)
+
+        if diff >= 1:
             self.emit_step_progress()
-            self.advancement += 1
+            self.previous_progress_step += diff
+
+        self.epochs_done += 1
 
     def run(self):
         # Core function of your process
@@ -128,21 +134,22 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         self.stop_train = False
         data_dir = self.get_input(0).get_path()
 
-        if not (os.path.isdir(data_dir)):
-            print("Input for train_timm_image_classification plugin is not correct. "
-                  "Make sure to put a valid path as input")
+        if not os.path.isdir(data_dir):
+            raise ValueError("Input is not correct. Make sure to put a valid path as input")
+
+        class_names = []
+        for base, dirs, files in os.walk(data_dir + "/train"):
+            for directory in dirs:
+                class_names.append(directory)
 
         if not param.cfg["use_custom_cfg"]:
             args = parser.parse_args([data_dir])
-            args.output = os.path.dirname(__file__) + "/output" if param.cfg["output_folder"] == "" else param.cfg[
-                "output_folder"]
-            if not os.path.isdir(args.output):
-                os.makedirs(args.output)
+            args.output = os.path.join(os.path.dirname(__file__), "output") \
+                if param.cfg["output_folder"] == "" \
+                else param.cfg["output_folder"]
 
-            class_names = []
-            for base, dirs, files in os.walk(data_dir + "/train"):
-                for directory in dirs:
-                    class_names.append(directory)
+            os.makedirs(args.output, exist_ok=True)
+
             args.model = param.cfg["model_name"]
             args.pretrained = param.cfg["use_pretrained"]
             args.num_classes = len(class_names)
@@ -150,24 +157,20 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
             args.epochs = param.cfg["epochs"]
             args.prefetcher = not args.no_prefetcher
             args.input_size = [3] + param.cfg["input_size"]
+            args.opt = param.cfg["optimizer"]
             args.lr = param.cfg["learning_rate"]
             args.checkpoint_hist = 5
             args.cooldown_epochs = 10 if args.epochs > 10 else 0
             args.epochs = args.epochs - args.cooldown_epochs
             args.no_aug = True
             args.train_backbone = param.cfg["train_backbone"]
-
         elif os.path.isfile(param.cfg["config_file"]):
             with open(param.cfg["config_file"], 'r') as f:
                 cfg = yaml.safe_load(f)
                 parser.set_defaults(**cfg)
                 args = parser.parse_args([data_dir])
-            class_names = []
-            for base, dirs, files in os.walk(args.data_dir + "/train"):
-                for directory in dirs:
-                    class_names.append(directory)
         else:
-            print("Config file " + param.cfg["cfg_file"] + " does not exist")
+            raise ValueError(f"Config file {param.cfg['cfg_file']} does not exist")
 
         # Distributed training not yet available in Ikomia
         args.distributed = False
@@ -180,10 +183,12 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
                                  str(param.cfg["input_size"][0]),
                                  str_datetime)
         self.tb_writer = SummaryWriter(tb_logdir)
-        self.advancement = 0
-        self.epochs_todo = args.epochs + args.cooldown_epochs
-        self.epochs_done = 0
-        train(args, self.get_stop, self.tb_writer, self.log_metrics, class_names, self.update_progress)
+        self.epochs = args.epochs + args.cooldown_epochs
+
+        train(args, class_names,
+              stop_fct=self.get_stop,
+              log_metrics=self.log_metrics,
+              update_progress=self.update_progress)
 
         # Step progress bar:
         self.emit_step_progress()
@@ -191,12 +196,22 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         # Call end_task_run to finalize process
         self.end_task_run()
 
-    def get_stop(self):
+    def get_stop(self) -> bool:
         return self.stop_train
 
     def stop(self):
         super().stop()
         self.stop_train = True
+
+    def log_metrics(self, metrics: dict, step: int):
+        # Tensorboard
+        self.tb_writer.add_scalar('loss_train', metrics['loss_train'], step)
+        self.tb_writer.add_scalar('loss_eval', metrics['loss_val'], step)
+        self.tb_writer.add_scalar('top1', metrics['top1'], step)
+        self.tb_writer.add_scalar('top5', metrics['top5'], step)
+
+        # mlflow
+        super().log_metrics(metrics, step)
 
 
 # --------------------
@@ -213,13 +228,16 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
         self.info.icon_path = "icons/timm.png"
-        self.info.version = "1.1.1"
-        # self.info.icon_path = "your path to a specific icon"
+        self.info.version = "1.2.0"
         self.info.authors = "Ross Wightman"
         self.info.article = "PyTorch Image Models"
         self.info.journal = "GitHub repository"
         self.info.year = 2019
         self.info.license = "Apache-2.0 License "
+        # Ikomia API compatibility
+        self.info.min_ikomia_version = "0.11.1"
+        # Python compatibility
+        self.info.min_python_version = "3.8.0"
         # URL of documentation
         self.info.documentation_link = "https://rwightman.github.io/pytorch-image-models/"
         # Code source repository

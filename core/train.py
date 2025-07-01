@@ -20,6 +20,7 @@ import importlib
 import json
 import logging
 import os
+import sys
 import time
 import yaml
 from collections import OrderedDict
@@ -68,6 +69,9 @@ except ImportError as e:
 has_compile = hasattr(torch, 'compile')
 
 _logger = logging.getLogger('train')
+
+if len(sys.argv) == 0:
+    sys.argv = ["ikomia"]
 
 # The first arg parser parses out only the --config argument, this argument is used to
 # load a yaml file containing key-values that override the defaults for the main parser below

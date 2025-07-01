@@ -49,7 +49,6 @@ class TrainTimmImageClassificationParam(TaskParam):
         self.cfg["output_folder"] = ""
         self.cfg["optimizer"] = "adamw"
         self.cfg["learning_rate"] = 0.005
-        self.cfg["train_backbone"] = True
 
     def set_values(self, param_map):
         # Set parameters values from Ikomia application
@@ -64,7 +63,6 @@ class TrainTimmImageClassificationParam(TaskParam):
         self.cfg["output_folder"] = param_map["output_folder"]
         self.cfg["optimizer"] = param_map["optimizer"]
         self.cfg["learning_rate"] = float(param_map["learning_rate"])
-        self.cfg["train_backbone"] = eval(param_map["train_backbone"])
 
     def get_values(self):
         # Send parameters values to Ikomia application
@@ -80,7 +78,6 @@ class TrainTimmImageClassificationParam(TaskParam):
             "output_folder": self.cfg["output_folder"],
             "optimizer": self.cfg["optimizer"],
             "learning_rate": str(self.cfg["learning_rate"]),
-            "train_backbone": str(self.cfg["train_backbone"])
         }
         return param_map
 
@@ -163,7 +160,6 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
             args.cooldown_epochs = 10 if args.epochs > 10 else 0
             args.epochs = args.epochs - args.cooldown_epochs
             args.no_aug = True
-            args.train_backbone = param.cfg["train_backbone"]
         elif os.path.isfile(param.cfg["config_file"]):
             with open(param.cfg["config_file"], 'r') as f:
                 cfg = yaml.safe_load(f)

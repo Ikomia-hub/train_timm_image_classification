@@ -18,12 +18,14 @@
 
 from ikomia import core, dataprocess
 from ikomia.utils import pyqtutils, qtconversion
-from train_timm_image_classification.train_timm_image_classification_process import TrainTimmImageClassificationParam
 
 # PyQt GUI framework
 from PyQt5.QtWidgets import *
+
 import timm
-from train_timm_image_classification.utils_ui import Autocomplete
+
+from train_timm_image_classification.train_timm_image_classification_process import TrainTimmImageClassificationParam
+from train_timm_image_classification.core.utils_ui import Autocomplete
 
 
 # --------------------

@@ -65,9 +65,6 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         # Pretrain
         self.check_pretrained = pyqtutils.append_check(self.gridLayout, "Pretrained on Imagenet",
                                                        self.parameters.cfg["use_pretrained"])
-        # Backbone
-        self.check_backbone = pyqtutils.append_check(self.gridLayout, "Train backbone",
-                                                     self.parameters.cfg["train_backbone"])
         # Output folder
         self.browse_output_folder = pyqtutils.append_browse_file(self.gridLayout, "Output folder",
                                                                  self.parameters.cfg["output_folder"],
@@ -91,7 +88,6 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         self.spin_input_w.setEnabled(not self.check_custom_cfg.isChecked())
         self.spin_input_h.setEnabled(not self.check_custom_cfg.isChecked())
         self.combo_model.setEnabled(not self.check_custom_cfg.isChecked())
-        self.check_backbone.setEnabled(not self.check_custom_cfg.isChecked())
         self.check_custom_cfg.stateChanged.connect(self.on_check)
         # PyQt -> Qt wrapping
         layout_ptr = qtconversion.PyQtToQt(self.gridLayout)
@@ -109,7 +105,6 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         self.spin_input_w.setEnabled(not self.check_custom_cfg.isChecked())
         self.spin_input_h.setEnabled(not self.check_custom_cfg.isChecked())
         self.combo_model.setEnabled(not self.check_custom_cfg.isChecked())
-        self.check_backbone.setEnabled(not self.check_backbone.isChecked())
 
     def on_apply(self):
         # Apply button clicked slot
@@ -125,7 +120,6 @@ class TrainTimmImageClassificationWidget(core.CWorkflowTaskWidget):
         self.parameters.cfg["use_pretrained"] = self.check_pretrained.isChecked()
         self.parameters.cfg["output_folder"] = self.browse_output_folder.path
         self.parameters.cfg["learning_rate"] = self.double_spin_lr.value()
-        self.parameters.cfg["train_backbone"] = self.check_backbone.isChecked()
 
         # Send signal to launch the process
         self.emit_apply(self.parameters)

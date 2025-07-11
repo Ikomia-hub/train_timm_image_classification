@@ -28,6 +28,7 @@ from ikomia.dnn import dnntrain
 from ikomia.core.task import TaskParam
 
 from train_timm_image_classification.core.train import train, parser
+from train_timm_image_classification.core.utils import get_class_names_sorted
 
 
 # --------------------
@@ -134,10 +135,7 @@ class TrainTimmImageClassification(dnntrain.TrainProcess):
         if not os.path.isdir(data_dir):
             raise ValueError("Input is not correct. Make sure to put a valid path as input")
 
-        class_names = []
-        for base, dirs, files in os.walk(data_dir + "/train"):
-            for directory in dirs:
-                class_names.append(directory)
+        class_names = get_class_names_sorted(os.path.join(data_dir, "train"))
 
         if not param.cfg["use_custom_cfg"]:
             args = parser.parse_args([data_dir])
@@ -224,7 +222,7 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
         self.info.icon_path = "icons/timm.png"
-        self.info.version = "1.2.1"
+        self.info.version = "1.2.2"
         self.info.authors = "Ross Wightman"
         self.info.article = "PyTorch Image Models"
         self.info.journal = "GitHub repository"

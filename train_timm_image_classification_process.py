@@ -229,9 +229,9 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         self.info.year = 2019
         self.info.license = "Apache-2.0 License "
         # Ikomia API compatibility
-        self.info.min_ikomia_version = "0.11.1"
+        self.info.min_ikomia_version = "0.12.0"
         # Python compatibility
-        self.info.min_python_version = "3.8.0"
+        self.info.min_python_version = "3.9.0"
         # URL of documentation
         self.info.documentation_link = "https://rwightman.github.io/pytorch-image-models/"
         # Code source repository
@@ -241,6 +241,10 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         self.info.keywords = "image, classification, imagenet, pretrain, pytorch"
         self.info.algo_type = core.AlgoType.TRAIN
         self.info.algo_tasks = "CLASSIFICATION"
+        self.info.hardware_config.min_cpu = 8
+        self.info.hardware_config.min_ram = 32
+        self.info.hardware_config.gpu_required = True
+        self.info.hardware_config.min_vram = 16
 
     def create(self, param=None):
         # Create process object

@@ -1,20 +1,3 @@
-# Copyright (C) 2021 Ikomia SAS
-# Contact: https://www.ikomia.com
-#
-# This file is part of the IkomiaStudio software.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import copy
 import os
 import yaml
@@ -222,16 +205,16 @@ class TrainTimmImageClassificationFactory(dataprocess.CTaskFactory):
         # relative path -> as displayed in Ikomia application process tree
         self.info.path = "Plugins/Python/Classification"
         self.info.icon_path = "icons/timm.png"
-        self.info.version = "1.3.1"
+        self.info.version = "1.4.0"
         self.info.authors = "Ross Wightman"
         self.info.article = "PyTorch Image Models"
         self.info.journal = "GitHub repository"
         self.info.year = 2019
         self.info.license = "Apache-2.0 License "
-        # Ikomia API compatibility
-        self.info.min_ikomia_version = "0.12.0"
+        # Ikomia API compatibility (Qt6)
+        self.info.min_ikomia_version = "0.16.0"
         # Python compatibility
-        self.info.min_python_version = "3.9.0"
+        self.info.min_python_version = "3.10.0"
         # URL of documentation
         self.info.documentation_link = "https://rwightman.github.io/pytorch-image-models/"
         # Code source repository
